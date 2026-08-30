@@ -715,24 +715,21 @@ function importTavern(){const i=document.createElement('input');i.type='file';i.
   i.onchange=async()=>{const f=i.files[0];if(!f)return;
     try{let card;
       if(/\.json$/i.test(f.name))card=JSON.parse(await f.text());
-      else{const buf=await f.arrayBuffer();card=pngChara(buf);
-        if(card)CE.avatar=await compress(f,240,.85)}
+      else{card=pngChara(await f.arrayBuffer());if(card)CE.avatar=await compress(f,240,.85)}
       if(!card)throw new Error('这张 PNG 里没有角色数据');
       const d=card.data||card;
       CE.name=d.name||CE.name;
       CE.persona=[d.description,d.personality&&('性格：'+d.personality),d.scenario&&('场景：'+d.scenario),
         d.mes_example&&('对话示例：\n'+d.mes_example)].filter(Boolean).join('\n\n');
       CE.greet=d.first_mes||'';
-      const cb=d.character_book;
-      if(cb&&cb.entries){let n=0;
-        (Array.isArray(cb.entries)?cb.entries:Object.values(cb.entries)).forEach(e=>{
-          if(e.content){S.lore.push({id:uid(),title:(e.comment||e.name||'导入条目').slice(0,30),body:e.content,
-            keys:e.keys||e.key||[],always:!!e.constant,on:e.enabled!==false});n++}});
-        if(n)toast(`同时导入了 ${n} 条世界书`)}
-      save();R.cedit({id:S.chars.find(c=>c.id===CE.id)?CE.id:undefined});
-      $('#cn').value=CE.name;$('#cp').value=CE.persona;$('#cg').value=CE.greet;$('#cpc').textContent=CE.persona.length+' 字';
-      if(CE.avatar)$('#cav').innerHTML=`<img src="${CE.avatar}">`;
-      toast('已读入「'+CE.name+'」，记得点右上角 ✓ 保存')}
+      let n=0;const cb=d.character_book;
+      if(cb&&cb.entries){(Array.isArray(cb.entries)?cb.entries:Object.values(cb.entries)).forEach(e=>{
+        if(e.content){S.lore.push({id:uid(),title:(e.comment||e.name||'导入条目').slice(0,30),body:e.content,
+          keys:e.keys||e.key||[],always:!!e.constant,on:e.enabled!==false});n++}});save()}
+      $('#cn').value=CE.name;$('#cp').value=CE.persona;$('#cg').value=CE.greet;
+      $('#cl').value=CE.look||'';$('#cpc').textContent=CE.persona.length+' 字';
+      if(CE.avatar)$('#cav').innerHTML='<img src="'+CE.avatar+'">';
+      toast('已读入「'+CE.name+'」'+(n?`，附带 ${n} 条世界书`:'')+'，点右上角 ✓ 保存',4200)}
     catch(e){toast('导入失败：'+e.message)}};i.click()}
   
 function pngChara(buf){const dv=new DataView(buf);let off=8;const td=new TextDecoder();
