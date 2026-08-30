@@ -734,6 +734,7 @@ function importTavern(){const i=document.createElement('input');i.type='file';i.
       if(CE.avatar)$('#cav').innerHTML=`<img src="${CE.avatar}">`;
       toast('已读入「'+CE.name+'」，记得点右上角 ✓ 保存')}
     catch(e){toast('导入失败：'+e.message)}};i.click()}
+  
 function pngChara(buf){const dv=new DataView(buf);let off=8;const td=new TextDecoder();
   while(off<dv.byteLength-8){const len=dv.getUint32(off);
     const type=td.decode(new Uint8Array(buf,off+4,4));
